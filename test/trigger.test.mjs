@@ -185,6 +185,22 @@ describe('TweakTickTrigger node', () => {
 		assert.equal(trigger.description.credentials[0].name, 'tweakTickApi');
 	});
 
+	it('has no notice, and the project filter sits in Options', () => {
+		const props = trigger.description.properties;
+		assert.equal(props.some((p) => p.type === 'notice'), false);
+		assert.equal(props.some((p) => p.name === 'projectId'), false);
+		const options = props.find((p) => p.name === 'options');
+		assert.equal(options.type, 'collection');
+		assert.deepEqual(options.default, {});
+		assert.deepEqual(options.options.map((o) => o.name), ['projectId']);
+	});
+
+	it('create without Options sends no project filter', async () => {
+		const ctx = fakeContext({ params: { event: 'newRound' }, answers: [() => ({ hook: { id: 'h-8' }, secret: 's' })] });
+		assert.equal(await methods.create.call(ctx), true);
+		assert.equal('projectIds' in ctx.calls[0].body, false);
+	});
+
 	it('checkExists looks at the stored hook id', async () => {
 		assert.equal(await methods.checkExists.call(fakeContext({ staticData: {} })), false);
 		assert.equal(await methods.checkExists.call(fakeContext({ staticData: { hookId: 'h-1' } })), true);
@@ -192,7 +208,7 @@ describe('TweakTickTrigger node', () => {
 
 	it('create POSTs /api/v2/hooks with the webhook URL and stores hookId + secret', async () => {
 		const ctx = fakeContext({
-			params: { event: 'commentReplied', projectId: 'p-1' },
+			params: { event: 'commentReplied', options: { projectId: 'p-1' } },
 			answers: [() => ({ hook: { id: 'h-7' }, secret: 'whsec_7' })],
 		});
 		assert.equal(await methods.create.call(ctx), true);
@@ -212,7 +228,7 @@ describe('TweakTickTrigger node', () => {
 
 	it('create on localhost throws a NodeApiError with the API message and the hint', async () => {
 		const ctx = fakeContext({
-			params: { event: 'newComment', projectId: '', __webhookUrl: 'http://localhost:5678/webhook/x' },
+			params: { event: 'newComment', options: {}, __webhookUrl: 'http://localhost:5678/webhook/x' },
 			answers: [() => { throw httpError(400, 'bad_request', 'url must use https'); }],
 		});
 		await assert.rejects(methods.create.call(ctx), (err) => {
@@ -284,5 +300,12 @@ describe('TweakTickTrigger node', () => {
 		assert.deepEqual(options, [{ name: 'Alpha', value: 'a' }, { name: 'Beta', value: 'b' }]);
 		assert.equal(ctx.calls[0].url, 'https://app.tweaktick.test/api/v2/projects');
 		assert.deepEqual(ctx.calls[0].qs, { limit: 200 });
+	});
+
+	it('the dropdown follows nextCursor', async () => {
+		const ctx = fakeContext({ answers: [() => ({ projects: [{ id: 'b', name: 'B' }], nextCursor: 'c1' }), () => ({ projects: [{ id: 'a', name: 'A' }], nextCursor: null })] });
+		const options = await trigger.methods.loadOptions.getProjects.call(ctx);
+		assert.deepEqual(options.map((o) => o.value), ['a', 'b']);
+		assert.deepEqual(ctx.calls[1].qs, { limit: 200, cursor: 'c1' });
 	});
 });

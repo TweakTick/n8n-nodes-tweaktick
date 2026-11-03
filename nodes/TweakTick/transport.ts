@@ -9,7 +9,7 @@ import type {
 import { NodeApiError } from 'n8n-workflow';
 
 import type { ApiRequest, RequestFn } from './shared';
-import { apiBaseUrl, apiErrorInfo, projectOptions } from './shared';
+import { apiBaseUrl, apiErrorInfo, listProjects, projectOptions } from './shared';
 
 type Ctx = IExecuteFunctions | IHookFunctions | ILoadOptionsFunctions;
 
@@ -57,6 +57,7 @@ export async function tweakTickRequester(ctx: Ctx): Promise<RequestFn> {
 /** loadOptions: the workspace's projects for the Project dropdown. */
 export async function getProjects(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 	const request = await tweakTickRequester(this);
-	const response = await request({ method: 'GET', path: '/projects', qs: { limit: 200 } });
-	return projectOptions(response);
+	// Follows nextCursor (CONTRACTS §11); at most 10 pages of 200.
+	const projects = await listProjects(request, { returnAll: true, maxPages: 10 });
+	return projectOptions({ projects });
 }

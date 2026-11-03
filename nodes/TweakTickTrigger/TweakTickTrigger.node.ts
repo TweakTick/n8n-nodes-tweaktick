@@ -41,13 +41,6 @@ export class TweakTickTrigger implements INodeType {
 		],
 		properties: [
 			{
-				displayName:
-					'TweakTick only sends events to a public https URL. Self-hosted n8n on http or localhost needs an https tunnel or reverse proxy (set WEBHOOK_URL).',
-				name: 'publicUrlNotice',
-				type: 'notice',
-				default: '',
-			},
-			{
 				displayName: 'Event',
 				name: 'event',
 				type: 'options',
@@ -93,13 +86,22 @@ export class TweakTickTrigger implements INodeType {
 				],
 			},
 			{
-				displayName: 'Project Name or ID',
-				name: 'projectId',
-				type: 'options',
-				typeOptions: { loadOptionsMethod: 'getProjects' },
-				default: '',
-				description:
-					'Only events from this project. Leave empty for all projects. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add option',
+				default: {},
+				options: [
+					{
+						displayName: 'Project Name or ID',
+						name: 'projectId',
+						type: 'options',
+						typeOptions: { loadOptionsMethod: 'getProjects' },
+						default: '',
+						description:
+							'Only events from this project. Leave empty for all projects. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+					},
+				],
 			},
 		],
 	};
@@ -118,7 +120,8 @@ export class TweakTickTrigger implements INodeType {
 			async create(this: IHookFunctions): Promise<boolean> {
 				const webhookUrl = this.getNodeWebhookUrl('default') as string;
 				const event = this.getNodeParameter('event') as string;
-				const projectId = this.getNodeParameter('projectId', '') as string;
+				const options = this.getNodeParameter('options', {}) as { projectId?: string };
+				const projectId = options.projectId ?? '';
 				const request = await tweakTickRequester(this);
 				const result = await createHook(request, event, webhookUrl, projectId);
 				if (!result.ok) {

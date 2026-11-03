@@ -8,7 +8,7 @@ import type {
 import { NodeApiError, NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 import type { ApiRequest } from './shared';
-import { actionOutput, buildActionRequest } from './shared';
+import { actionOutput, buildActionRequest, listProjects } from './shared';
 import { getProjects, tweakTickRequester } from './transport';
 
 /*
@@ -120,22 +120,39 @@ export class TweakTick implements INodeType {
 				displayOptions: { show: { resource: ['comment'], operation: ['createReply'] } },
 			},
 			{
-				displayName: 'Internal (Agency Only)',
-				name: 'internal',
-				type: 'boolean',
-				default: true,
-				description:
-					'Whether the reply is internal. Internal replies are seen only by your team; turn this off to reply to the client.',
+				displayName: 'Options',
+				name: 'options',
+				type: 'collection',
+				placeholder: 'Add option',
+				default: {},
 				displayOptions: { show: { resource: ['comment'], operation: ['createReply'] } },
+				options: [
+					{
+						displayName: 'Internal (Agency Only)',
+						name: 'internal',
+						type: 'boolean',
+						default: true,
+						description:
+							'Whether the reply is internal. Internal replies are seen only by your team; turn this off to reply to the client.',
+					},
+				],
+			},
+			{
+				displayName: 'Return All',
+				name: 'returnAll',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to return all results or only up to a given limit',
+				displayOptions: { show: { resource: ['project'], operation: ['getAll'] } },
 			},
 			{
 				displayName: 'Limit',
 				name: 'limit',
 				type: 'number',
-				typeOptions: { minValue: 1, maxValue: 200 },
+				typeOptions: { minValue: 1 },
 				default: 50,
 				description: 'Max number of results to return',
-				displayOptions: { show: { resource: ['project'], operation: ['getAll'] } },
+				displayOptions: { show: { resource: ['project'], operation: ['getAll'], returnAll: [false] } },
 			},
 		],
 	};
@@ -154,17 +171,26 @@ export class TweakTick implements INodeType {
 				const resource = this.getNodeParameter('resource', i) as string;
 				const operation = this.getNodeParameter('operation', i) as string;
 
+				if (resource === 'project' && operation === 'getAll') {
+					const returnAll = this.getNodeParameter('returnAll', i, false) as boolean;
+					const limit = returnAll ? undefined : (this.getNodeParameter('limit', i, 50) as number);
+					for (const json of await listProjects(request, { returnAll, limit })) {
+						returnData.push({ json, pairedItem: { item: i } });
+					}
+					continue;
+				}
+
 				let apiRequest: ApiRequest;
 				try {
+					const options =
+						operation === 'createReply'
+							? (this.getNodeParameter('options', i, {}) as { internal?: boolean })
+							: {};
 					apiRequest = buildActionRequest(resource, operation, {
 						commentId: resource === 'comment' ? (this.getNodeParameter('commentId', i) as string) : undefined,
 						text:
 							operation === 'createReply' ? (this.getNodeParameter('text', i) as string) : undefined,
-						internal:
-							operation === 'createReply'
-								? (this.getNodeParameter('internal', i, true) as boolean)
-								: undefined,
-						limit: resource === 'project' ? (this.getNodeParameter('limit', i, 50) as number) : undefined,
+						internal: operation === 'createReply' ? options.internal ?? true : undefined,
 					});
 				} catch (error) {
 					throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });

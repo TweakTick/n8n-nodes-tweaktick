@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 (3 Nov 2026)
+
+Changes from the n8n verification review:
+
+- Project → Get Many: new **Return All** switch. When it is on, the node pages through every project (`nextCursor`); when it is off, **Limit** (default 50) sets how many, with no 200 cap.
+- Comment → Create Reply: **Internal (Agency Only)** moved into **Options**. Replies stay internal by default.
+- TweakTick Trigger: the project filter moved into **Options**, and the setup notice was removed (the public https URL requirement is in this README and in the activation error).
+- **Upgrading:** a workflow saved with Internal turned off, or with a project filter, loses that setting. Set it again under Options.
+
 ## 0.3.1 (2 Nov 2026)
 
 - The default Base URL is now `https://tweaktick.com` (was `https://app.tweaktick.com`; the app is served from the main domain). Credentials that saved the old default must change it.

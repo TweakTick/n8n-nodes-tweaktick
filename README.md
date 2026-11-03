@@ -31,7 +31,7 @@ The key acts as the owner who created it. It stops working when it is revoked or
 
 ## TweakTick Trigger
 
-Pick an **Event** and, if you like, one **Project** (leave it empty for all projects).
+Pick an **Event**. To limit it to one project, open **Options** → **Project Name or ID** (leave it out for all projects).
 
 | Event | Fires when |
 |---|---|
@@ -71,10 +71,10 @@ When you activate the workflow (or click **Listen for test event**), the node re
 
 | Resource | Operation | What it does |
 |---|---|---|
-| Comment | Create Reply | Adds a reply to a thread. **Internal (Agency Only)** is on by default; turn it off to reply to the client |
+| Comment | Create Reply | Adds a reply to a thread. Replies are internal (agency only) by default; to reply to the client, add **Options** → **Internal (Agency Only)** and turn it off |
 | Comment | Get | Gets a thread with its replies |
 | Comment | Resolve / Reopen | Sets the thread's status |
-| Project | Get Many | Lists projects, newest first (up to 200) |
+| Project | Get Many | Lists projects, newest first. **Return All** pages through every project; otherwise **Limit** sets how many (default 50) |
 
 **Comment ID** is the thread ID. From the trigger, use `{{ $json.pin.id }}`, not `comment.id`.
 

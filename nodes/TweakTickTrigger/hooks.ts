@@ -1,6 +1,6 @@
 /**
  * Pure trigger logic (hook registration, signature check), unit-tested in
- * test/trigger.test.mjs. Contract: poc/app/docs-internal/automation-hooks-contract.md.
+ * test/trigger.test.mjs. Contract: tweaktick/app/docs-internal/automation-hooks-contract.md.
  */
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
