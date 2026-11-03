@@ -16,10 +16,10 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/tweaktick/n8n-nodes-tweaktick.git"
+		"url": "https://github.com/TweakTick/n8n-nodes-tweaktick.git"
 	},
 	"bugs": {
-		"url": "https://github.com/tweaktick/n8n-nodes-tweaktick/issues",
+		"url": "https://github.com/TweakTick/n8n-nodes-tweaktick/issues",
 		"email": "support@tweaktick.com"
 	},
 	"engines": {
