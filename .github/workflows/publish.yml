@@ -1,0 +1,79 @@
+# Publishes n8n-nodes-tweaktick to npm with a provenance statement on every
+# version tag push. n8n requires GitHub Actions + npm provenance for all
+# community nodes from 1 May 2026, and for verified status.
+#
+# This file lives in poc/n8n-node/ in the monorepo. It only runs from the root
+# of the PUBLIC repo github.com/tweaktick/n8n-nodes-tweaktick, which is the
+# published source (README "Releasing"): there it sits at
+# .github/workflows/publish.yml.
+#
+# One-time setup (either works with this file unchanged):
+#   A. NPM_TOKEN (now): a granular npm token with publish rights on this
+#      package, saved as the repo secret NPM_TOKEN. Needed for the very first
+#      publish, because a package must exist before it can get a trusted
+#      publisher.
+#   B. npm Trusted Publishing (later, recommended, no secrets): npmjs.com →
+#      package settings → Trusted Publisher → GitHub Actions, owner
+#      "tweaktick", repo "n8n-nodes-tweaktick", workflow "publish.yml". Then
+#      delete the NPM_TOKEN secret (and revoke the token). Trusted publishing
+#      needs npm >= 11.5.1, installed below.
+#
+# Release: the tag push (e.g. 0.3.2, matching package.json "version")
+# triggers this workflow. See README "Releasing".
+
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # npm provenance + trusted publishing (OIDC)
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install npm >= 11.5.1 (trusted publishing)
+        run: |
+          npm install -g npm@latest
+          v="$(npm --version)"
+          echo "npm $v"
+          node -e 'const [a,b,c]=process.argv[1].split(".").map(Number); process.exit(a>11||(a===11&&(b>5||(b===5&&c>=1)))?0:1)' "$v" \
+            || { echo "::error::npm $v is older than 11.5.1"; exit 1; }
+      - name: Tag matches package.json version
+        run: |
+          pkg="$(node -p 'require("./package.json").version')"
+          if [ "$pkg" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            exit 1
+          fi
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test
+        run: pnpm test
+      - name: Release
+        # In GitHub Actions `n8n-node release` lints, builds and runs
+        # `npm publish` with NPM_CONFIG_PROVENANCE=true (set here too).
+        # NODE_AUTH_TOKEN feeds the .npmrc written by setup-node. With the
+        # NPM_TOKEN secret unset it is empty, and npm >= 11.5.1 uses the OIDC
+        # trusted-publishing exchange instead.
+        run: pnpm run release
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: 'true'

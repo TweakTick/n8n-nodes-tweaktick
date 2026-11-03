@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-tweaktick.tweakTickTrigger",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Productivity", "Communication"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://github.com/tweaktick/n8n-nodes-tweaktick?tab=readme-ov-file#credentials"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://github.com/tweaktick/n8n-nodes-tweaktick?tab=readme-ov-file"
+			}
+		]
+	}
+}
