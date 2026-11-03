@@ -63,5 +63,9 @@
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": []
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
 	}
 }
