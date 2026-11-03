@@ -1,6 +1,6 @@
 {
 	"name": "n8n-nodes-tweaktick",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "n8n nodes for TweakTick: trigger on client feedback, approvals and rounds; reply to, resolve and reopen comments.",
 	"license": "MIT",
 	"homepage": "https://tweaktick.com",
