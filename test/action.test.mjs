@@ -116,8 +116,10 @@ describe('listProjects', () => {
 describe('apiBaseUrl', () => {
 	it('strips trailing slashes and defaults to production', () => {
 		assert.equal(shared.apiBaseUrl('http://localhost:3006/'), 'http://localhost:3006/api/v2');
-		assert.equal(shared.apiBaseUrl(''), 'https://tweaktick.com/api/v2');
-		assert.equal(shared.apiBaseUrl(undefined), 'https://tweaktick.com/api/v2');
+		assert.equal(shared.apiBaseUrl(''), 'https://app.tweaktick.com/api/v2');
+		assert.equal(shared.apiBaseUrl(undefined), 'https://app.tweaktick.com/api/v2');
+		// Credentials saved with the 0.3.1-0.4.0 default keep working (tweaktick.com/api is a permanent alias).
+		assert.equal(shared.apiBaseUrl('https://tweaktick.com'), 'https://tweaktick.com/api/v2');
 		assert.throws(() => shared.apiBaseUrl('http://tweaktick.example.com'), /https/);
 		assert.throws(() => shared.apiBaseUrl('https://u:p@tweaktick.com'), /user name/);
 		assert.throws(() => shared.apiBaseUrl('not a url'), /valid/);
@@ -241,6 +243,6 @@ describe('TweakTickApi credentials', () => {
 	it('has a password apiKey and an https default base URL', () => {
 		const apiKey = cred.properties.find((p) => p.name === 'apiKey');
 		assert.equal(apiKey.typeOptions.password, true);
-		assert.equal(cred.properties.find((p) => p.name === 'baseUrl').default, 'https://tweaktick.com');
+		assert.equal(cred.properties.find((p) => p.name === 'baseUrl').default, 'https://app.tweaktick.com');
 	});
 });

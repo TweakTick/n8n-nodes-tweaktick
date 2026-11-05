@@ -19,7 +19,7 @@ export interface ApiRequest {
 export type RequestFn = (request: ApiRequest) => Promise<unknown>;
 
 export function apiBaseUrl(baseUrl: unknown): string {
-	const raw = typeof baseUrl === 'string' && baseUrl.trim() !== '' ? baseUrl.trim() : 'https://tweaktick.com';
+	const raw = typeof baseUrl === 'string' && baseUrl.trim() !== '' ? baseUrl.trim() : 'https://app.tweaktick.com';
 	// The API key travels in the Authorization header: plain http only for a local dev server.
 	if (!URL.canParse(raw)) throw new Error('The TweakTick Base URL is not a valid address');
 	const url = new URL(raw);

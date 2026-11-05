@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 (5 Nov 2026)
+
+- The default Base URL is now `https://app.tweaktick.com` (`https://tweaktick.com` still works). No behaviour change for existing credentials.
+
 ## 0.4.0 (3 Nov 2026)
 
 Changes from the n8n verification review:

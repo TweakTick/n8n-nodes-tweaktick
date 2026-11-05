@@ -24,7 +24,7 @@ You need a paid TweakTick plan. The trial has no API access, so requests answer 
 2. Copy the key (it starts with `prk_` and is shown once).
 3. In n8n, create a **TweakTick API** credential:
    - **API Key:** the key.
-   - **Base URL:** leave it as `https://tweaktick.com` unless you run your own TweakTick app.
+   - **Base URL:** leave it as `https://app.tweaktick.com` unless you run your own TweakTick app. Credentials saved with `https://tweaktick.com` keep working.
 4. Save. n8n tests the key with `GET /api/v2/me`.
 
 The key acts as the owner who created it. It stops working when it is revoked or that person is no longer an owner, and the hooks it created stop too.

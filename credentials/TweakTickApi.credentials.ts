@@ -31,7 +31,7 @@ export class TweakTickApi implements ICredentialType {
 			displayName: 'Base URL',
 			name: 'baseUrl',
 			type: 'string',
-			default: 'https://tweaktick.com',
+			default: 'https://app.tweaktick.com',
 			description: 'Change only for a self-hosted or development TweakTick app',
 		},
 	];
